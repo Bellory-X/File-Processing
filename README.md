@@ -8,3 +8,8 @@
 ![image](https://github.com/Bellory-X/File-Processing/assets/80157339/4ee0feb3-ea87-44fe-a002-761ade28d95b)
 ![image](https://github.com/Bellory-X/File-Processing/assets/80157339/7d40dbdf-c381-406f-b3c5-b02cde86a8bb)
 ![image](https://github.com/Bellory-X/File-Processing/assets/80157339/dd7df544-75a7-45e0-941f-62f9e40a6498)
+
+Комментарий:
+Логика обработки запросов разбита на два сервиса:
+- ProcessedFileInfoService обрабатывающий запросы на список обработанных файлов фильтрованных переменным фильтрации startDateTime и endDateTime и запрос информации по файлу по fileId.
+- UnprocessedFileInfoService обрабатывающий запрос на список необработанных файлов из файловой системы и запрос на обработку всех необработанных файлов. Для сокращения обходов по дереву файлов прописана логика проверки последней модификации корневой дериктории.
