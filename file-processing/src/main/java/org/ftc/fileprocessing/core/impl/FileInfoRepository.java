@@ -2,6 +2,7 @@ package org.ftc.fileprocessing.core.impl;
 
 import com.github.f4b6a3.uuid.UuidCreator;
 import org.ftc.fileprocessing.app.ProcessedFileInfoFilter;
+import org.ftc.fileprocessing.platform.DbMapException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -69,23 +70,31 @@ public class FileInfoRepository {
         return jdbcTemplate.query(SELECT_FILE_INFO_BY_ID, this::map, fileId).stream().findFirst();
     }
 
-    private FileInfo map(ResultSet rs, Integer rowNum) throws SQLException {
-        return new FileInfo(
-                UuidCreator.fromString(rs.getString("id")),
-                rs.getString("file_name"),
-                rs.getString("path"),
-                rs.getLong("file_size"),
-                rs.getTimestamp("processed_time").toLocalDateTime().atZone(ZoneId.systemDefault()),
-                rs.getTimestamp("last_modified_time").toLocalDateTime().atZone(ZoneId.systemDefault())
-        );
+    private FileInfo map(ResultSet rs, Integer rowNum) {
+        try {
+            return new FileInfo(
+                    UuidCreator.fromString(rs.getString("id")),
+                    rs.getString("file_name"),
+                    rs.getString("path"),
+                    rs.getLong("file_size"),
+                    rs.getTimestamp("processed_time").toLocalDateTime().atZone(ZoneId.systemDefault()),
+                    rs.getTimestamp("last_modified_time").toLocalDateTime().atZone(ZoneId.systemDefault())
+            );
+        } catch (SQLException e) {
+            throw new DbMapException(e);
+        }
     }
 
-    private void map(PreparedStatement ps, FileInfo domainModel) throws SQLException {
-        ps.setObject(1, domainModel.fileId());
-        ps.setString(2, domainModel.fileName());
-        ps.setString(3, domainModel.path());
-        ps.setLong(4, domainModel.fileSize());
-        ps.setTimestamp(5, Timestamp.valueOf(domainModel.processedDateTime().toLocalDateTime()));
-        ps.setTimestamp(6, Timestamp.valueOf(domainModel.lastModifiedDateTime().toLocalDateTime()));
+    private void map(PreparedStatement ps, FileInfo domainModel) {
+        try {
+            ps.setObject(1, domainModel.fileId());
+            ps.setString(2, domainModel.fileName());
+            ps.setString(3, domainModel.path());
+            ps.setLong(4, domainModel.fileSize());
+            ps.setTimestamp(5, Timestamp.valueOf(domainModel.processedDateTime().toLocalDateTime()));
+            ps.setTimestamp(6, Timestamp.valueOf(domainModel.lastModifiedDateTime().toLocalDateTime()));
+        } catch (SQLException e) {
+            throw new DbMapException(e);
+        }
     }
 }

@@ -3,6 +3,7 @@ package org.ftc.fileprocessing.core.impl;
 import com.github.f4b6a3.uuid.UuidCreator;
 import org.ftc.fileprocessing.app.UnprocessedFileInfoRow;
 import org.ftc.fileprocessing.core.impl.config.FileInfoConfigurationProperties;
+import org.ftc.fileprocessing.core.impl.exception.FindUnprocessedFileInfoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -37,8 +38,8 @@ public class UnprocessedFileInfoService {
         this.repository = repository;
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
-    public void process() {
+    @Scheduled(cron = "${file.processing.cron}")
+    public synchronized void process() {
         repository.addAll(findUnprocessedFileInfos());
         unprocessedFiles.clear();
     }
@@ -65,7 +66,7 @@ public class UnprocessedFileInfoService {
                 });
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new FindUnprocessedFileInfoException(e);
         }
         return unprocessedFiles;
     }

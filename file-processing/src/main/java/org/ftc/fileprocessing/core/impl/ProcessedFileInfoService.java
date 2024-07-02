@@ -4,16 +4,14 @@ import org.ftc.fileprocessing.app.ProcessedFileInfoFilter;
 import org.ftc.fileprocessing.app.ProcessedFileInfoForm;
 import org.ftc.fileprocessing.app.ProcessedFileInfoRow;
 import org.ftc.fileprocessing.core.impl.config.FileInfoConfigurationProperties;
+import org.ftc.fileprocessing.core.impl.exception.FindProcessedFileInfoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
 public class ProcessedFileInfoService {
 
     private final FileInfoConfigurationProperties properties;
@@ -34,6 +32,6 @@ public class ProcessedFileInfoService {
     public ProcessedFileInfoForm getFileInfoForm(UUID fileId) {
         return repository.findById(fileId)
                 .map(it -> FileInfoMapper.toFileInfoForm(it, properties))
-                .orElseThrow();
+                .orElseThrow(() -> new FindProcessedFileInfoException(fileId));
     }
 }
